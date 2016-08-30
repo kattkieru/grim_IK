@@ -3,7 +3,7 @@
 //Last modified: Mon, May 23, 2016 10:59:55 pm
 //Codeset: UTF-8
 requires maya "2016ff07";
-requires -nodeType "grim_vik" "grimIK" "R001";
+requires -nodeType "grim_vik" "grim_IK" "R001";
 currentUnit -linear centimeter -angle degree -time film;
 fileInfo "application" "maya";
 fileInfo "product" "Maya 2016";

@@ -7,7 +7,7 @@ SConscript for somatic_rope plugin set
 import os, sys
 platform = sys.platform
 
-PLUGIN_NAME = 'grimIK'
+PLUGIN_NAME = 'grim_IK'
 
 env = Environment(
 	CPPDEFINES=[
