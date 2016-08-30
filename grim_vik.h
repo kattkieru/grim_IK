@@ -17,7 +17,7 @@ public:
 	virtual				~Grim_VIK(); 
 
 	virtual void        postConstructor();
-	virtual MStatus     setDependentsDirty( const MPlug &plugBeingDirtied, MPlugArray &affectedPlugs );
+	// virtual MStatus     setDependentsDirty( const MPlug &plugBeingDirtied, MPlugArray &affectedPlugs );
 
 	virtual MStatus		compute( const MPlug& plug, MDataBlock& data );
 

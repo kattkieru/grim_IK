@@ -40,14 +40,6 @@ const struct {
 	double MIN_SOFTNESS = 0.00000001;
 } IK {}; // need to force the initializer on gcc
 
-
-// ----------------------------------------------------------------------
-inline MVector spin_vector_around_axis( const MVector &vec, const float angle, const MVector &axis  ) {
-	MVector projected = (vec * axis) * axis;
-	return( cosf(angle) * (vec - projected) + sinf(angle) * (axis ^ vec) + projected );
-}
-
-
 // ----------------------------------------------------------------------
 Grim_VIK::Grim_VIK() {
 
@@ -63,6 +55,7 @@ void Grim_VIK::postConstructor() {
 }
 
 // ----------------------------------------------------------------------
+/*
 MStatus Grim_VIK::setDependentsDirty( const MPlug &plugBeingDirtied, MPlugArray &affectedPlugs )
 {
 	MObject mob = plugBeingDirtied.attribute();
@@ -72,6 +65,7 @@ MStatus Grim_VIK::setDependentsDirty( const MPlug &plugBeingDirtied, MPlugArray 
 
 	return(MStatus::kSuccess);
 }
+*/
 
 // ----------------------------------------------------------------------
 inline void Grim_VIK::calculate_orientations( Pose &pose, const MPoint &pole_point, const bool flip ) {
