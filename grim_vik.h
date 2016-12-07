@@ -39,7 +39,7 @@ public:
 
 	static MObject      iStretchBlend;
 	static MObject      iFkIkBlend;
-	static MObject      iElbowPinBlend;
+	static MObject      iPinBlend;
 	static MObject      iReverseBlend;
     static MObject      iOrientTipBlend;
     static MObject      iFlipOrientation;

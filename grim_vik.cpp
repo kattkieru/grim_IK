@@ -14,7 +14,7 @@ MObject Grim_VIK::iFkMatrix;
 
 MObject Grim_VIK::iStretchBlend;
 MObject Grim_VIK::iFkIkBlend;
-MObject Grim_VIK::iElbowPinBlend;
+MObject Grim_VIK::iPinBlend;
 MObject Grim_VIK::iReverseBlend;
 MObject Grim_VIK::iOrientTipBlend;
 MObject Grim_VIK::iFlipOrientation;
@@ -115,7 +115,7 @@ MStatus Grim_VIK::compute( const MPlug& plug, MDataBlock& data )
 	MMatrix poleMatrix       = data.inputValue(iPoleMatrix).asMatrix();
 	double  stretchBlend     = data.inputValue(iStretchBlend).asDouble();
 	double  fkIkBlend        = data.inputValue(iFkIkBlend).asDouble();
-	double  elbowPinBlend    = data.inputValue(iElbowPinBlend).asDouble();
+	double  pinBlend         = data.inputValue(iPinBlend).asDouble();
 	double  reverseBlend     = data.inputValue(iReverseBlend).asDouble();
 	double  orientTipBlend   = data.inputValue(iOrientTipBlend).asDouble();
 	double  flipOrientation  = data.inputValue(iFlipOrientation).asDouble();
@@ -202,7 +202,7 @@ MStatus Grim_VIK::compute( const MPlug& plug, MDataBlock& data )
 			blended on or be the full final position.
 		*/
 
-		if (distance > soft_distance && elbowPinBlend != 1.0) {
+		if (distance > soft_distance && pinBlend != 1.0) {
 			// this is the regular soft IK calculation
 			// multiply adjusted_distance by goal_vector to get new goal position
 			double k { softness * ( 1.0 - exp(-1.0*(distance-soft_distance)/softness) ) + soft_distance };
@@ -271,17 +271,17 @@ MStatus Grim_VIK::compute( const MPlug& plug, MDataBlock& data )
 			elbow pin
 			not sure if it's the right to do it here, or if I should
 			do it earlier... Should probably force early out on all
-			the IK stuff above if elbowPinBlend == 1.0.
+			the IK stuff above if pinBlend == 1.0.
 		*/
 
-		if (elbowPinBlend > 0.0) {
-			if (elbowPinBlend == 1.0) {
+		if (pinBlend > 0.0) {
+			if (pinBlend == 1.0) {
 				ik_pose.position[1] = polePos;
 				ik_pose.position[2] = goalPos;
 			}
 			else {
-				ik_pose.position[1] = lerp( ik_pose.position[1], polePos, elbowPinBlend );
-				ik_pose.position[2] = lerp( ik_pose.position[2], goalPos, elbowPinBlend );
+				ik_pose.position[1] = lerp( ik_pose.position[1], polePos, pinBlend );
+				ik_pose.position[2] = lerp( ik_pose.position[2], goalPos, pinBlend );
 			}
 		}
 
@@ -289,9 +289,9 @@ MStatus Grim_VIK::compute( const MPlug& plug, MDataBlock& data )
 			reverse blend
 		*/
 
-		// bugfix: elbowPinBlend doesn't like the reversal
+		// bugfix: pinBlend doesn't like the reversal
 		//!FIXME: Make this work properly
-		reverseBlend *= 1.0 - elbowPinBlend;
+		reverseBlend *= 1.0 - pinBlend;
 
 		if (reverseBlend > 0.0 ) {
 			// project elbow onto goal vector, make a new vector through elbow
@@ -425,14 +425,14 @@ MStatus Grim_VIK::initialize()
 		nAttr.setMax(1.0);
 	CHECK_MSTATUS_AND_RETURN_IT( addAttribute(iFkIkBlend) );
 
-	iElbowPinBlend = nAttr.create("elbowPinBlend", "elbowPinBlend", MFnNumericData::kDouble, 0.0);
+	iPinBlend = nAttr.create("pinBlend", "pinBlend", MFnNumericData::kDouble, 0.0);
 		nAttr.setStorable(true);
 		nAttr.setKeyable(true);
 		nAttr.setReadable(true);
 		nAttr.setWritable(true);
 		nAttr.setMin(0.0);
 		nAttr.setMax(1.0);
-	CHECK_MSTATUS_AND_RETURN_IT( addAttribute(iElbowPinBlend) );
+	CHECK_MSTATUS_AND_RETURN_IT( addAttribute(iPinBlend) );
 
 	iReverseBlend = nAttr.create("reverseBlend", "reverseBlend", MFnNumericData::kDouble, 0.0);
 		nAttr.setStorable(true);
@@ -588,7 +588,7 @@ MStatus Grim_VIK::initialize()
 		{ "fkMatrix",         & iFkMatrix },
 		{ "stretchBlend",     & iStretchBlend },
 		{ "fkIkBlend",        & iFkIkBlend },
-		{ "elbowPinBlend",    & iElbowPinBlend },
+		{ "pinBlend",    & iPinBlend },
 		{ "reverseBlend",     & iReverseBlend },
         { "orientTipBlend",   & iOrientTipBlend },
 		{ "flipOrientation",  & iFlipOrientation },
@@ -631,7 +631,7 @@ void Grim_VIK::aeTemplate() {
                 editorTemplate -addControl "flipOrientation";
 				editorTemplate -addControl "stretchBlend";
 				editorTemplate -addControl "fkIkBlend";
-				editorTemplate -addControl "elbowPinBlend";
+				editorTemplate -addControl "pinBlend";
 				editorTemplate -addControl "reverseBlend";
 				editorTemplate -addControl "orientTipBlend";
 				editorTemplate -addControl "upperLength";
