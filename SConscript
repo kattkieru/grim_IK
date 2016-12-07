@@ -7,6 +7,7 @@ SConscript for somatic_rope plugin set
 import os, sys
 platform = sys.platform
 
+INSTALL_DIRECTORY = "/Users/kiki/Dropbox/skeletal_studios/studio_module/2017/plug-ins"
 PLUGIN_NAME = 'grim_IK'
 
 env = Environment(
@@ -49,8 +50,8 @@ if platform == 'darwin':
 		'-Wl,-exported_symbol,__Z18uninitializePlugin7MObject'
 		]
 
-	MAYA_BASE = "/Applications/Autodesk/maya2016"
-	MAYA_HEADERS_DIR = MAYA_BASE + "/devkit/include"
+	MAYA_BASE = "/Applications/Autodesk/maya2017"
+	MAYA_HEADERS_DIR = MAYA_BASE + "/include"
 	MAYA_LIBRARY_DIR = MAYA_BASE + "/Maya.app/Contents/MacOS"
 	env.Append( CFLAGS=CFLAGS )
 	env.Append( CCFLAGS=CCFLAGS )
@@ -74,9 +75,9 @@ elif platform.startswith('linux'):
 	TARGET = PLUGIN_NAME + '.so'
 
 elif platform == 'win32':
-	# MAYA_BASE = "C:/aw/maya2016/"
-	MAYA_HEADERS_DIR = "C:/aw/maya2016/include"
-	MAYA_LIBRARY_DIR = "C:/Progra~1/Autodesk/Maya2016/lib/"
+	# MAYA_BASE = "C:/aw/maya2017/"
+	MAYA_HEADERS_DIR = "C:/aw/maya2017/include"
+	MAYA_LIBRARY_DIR = "C:/Progra~1/Autodesk/Maya2017/lib/"
 	env.Append( CCFLAGS=[
 		'/EHsc',	## no clue but if this isn't here, there will be tears
 		'/MT',      ## build without needing the runtime distributable
@@ -135,7 +136,7 @@ sources = [
 env.SharedLibrary( target=TARGET, source=sources, SHLIBPREFIX='' )
 
 ## set the install directory yourself
-# env.Install( INSTALL_DIRECTORY, TARGET )
-# env.Alias( 'install', INSTALL_DIRECTORY )
+env.Install( INSTALL_DIRECTORY, TARGET )
+env.Alias( 'install', INSTALL_DIRECTORY )
 
 
