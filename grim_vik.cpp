@@ -1,4 +1,4 @@
-
+	
 // ----------------------------------------------------------------------
 
 #include "common.h"
@@ -164,12 +164,19 @@ MStatus Grim_VIK::compute( const MPlug& plug, MDataBlock& data )
 
 	if (fkIkBlend < 1.0) {
 		MArrayDataHandle h_fkMatrix = data.inputArrayValue(iFkMatrix);
+		MMatrix scale_mat;
+		scale_mat[0][0] = scale_mat[1][1] = scale_mat[2][2] = inverse_scale;
+
 		if (h_fkMatrix.elementCount() > 2) {
 			for (index = 0; index < 3; index++) {
 				h_fkMatrix.jumpToArrayElement(index);
 				MTransformationMatrix mt_mat = MTransformationMatrix( h_fkMatrix.inputValue().asMatrix() );
-				fk_pose.position[index]      = mt_mat.translation(MSpace::kTransform);
 				fk_pose.orientation[index]   = mt_mat.rotation();
+				fk_pose.position[index]      = mt_mat.translation(MSpace::kTransform);
+				// bugfix: gotta scale the FK controls properly
+				fk_pose.position[index] -= rootPos;
+				fk_pose.position[index] *= scale_mat;
+				fk_pose.position[index] += rootPos;
 			}
 		}
 	}
