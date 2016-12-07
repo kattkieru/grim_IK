@@ -1,0 +1,13 @@
+.git
+*.obj
+*.pdb
+.scons*
+.idea
+*.lib
+*.exp
+*.bundle
+*.mll
+*.so
+*.os
+.DS_Store
+
