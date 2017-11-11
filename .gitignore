@@ -10,4 +10,5 @@
 *.so
 *.os
 .DS_Store
+.vscode
 
