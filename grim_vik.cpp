@@ -326,7 +326,6 @@ MStatus Grim_VIK::compute( const MPlug& plug, MDataBlock& data )
 			else
 				ik_pose.orientation[2] = slerp(ik_pose.orientation[1], goal_quat, orientTipBlend);
 		}
-
 	}
 
 	Pose final_pose;
@@ -374,6 +373,9 @@ MStatus Grim_VIK::compute( const MPlug& plug, MDataBlock& data )
 		MEulerRotation rotation = mt_final.eulerRotation();
 		b_outRotate.addElement(index).set( rotation.x, rotation.y, rotation.z );
 	}
+
+	h_outTranslate.setAllClean();
+	h_outRotate.setAllClean();
 
 	return MS::kSuccess;
 }
