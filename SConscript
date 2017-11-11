@@ -1,13 +1,13 @@
 ## ----------------------------------------------------------------------
 '''
-SConscript for somatic_rope plugin set
+SConscript for grim_IK plugin set
 '''
 ## ----------------------------------------------------------------------
 
 import os, sys
 platform = sys.platform
 
-INSTALL_DIRECTORY = "/Users/kiki/Dropbox/skeletal_studios/studio_module/2017/plug-ins"
+INSTALL_DIRECTORY = "/Users/kiki/Dropbox/skeletal_studios/studio_module/2018/plug-ins"
 PLUGIN_NAME = 'grim_IK'
 
 env = Environment(
@@ -46,11 +46,11 @@ if platform == 'darwin':
 		'-framework', 'SystemConfiguration', '-framework', 'CoreServices',
 		'-framework', 'Cocoa', '-framework', 'ApplicationServices',
 		'-framework', 'IOKit',
-		'-Wl,-exported_symbol,__Z16initializePlugin7MObject',
-		'-Wl,-exported_symbol,__Z18uninitializePlugin7MObject'
+		# '-Wl,-exported_symbol,__Z16initializePlugin7MObject',
+		# '-Wl,-exported_symbol,__Z18uninitializePlugin7MObject'
 		]
 
-	MAYA_BASE = "/Applications/Autodesk/maya2017"
+	MAYA_BASE = "/Applications/Autodesk/maya2018"
 	MAYA_HEADERS_DIR = MAYA_BASE + "/include"
 	MAYA_LIBRARY_DIR = MAYA_BASE + "/Maya.app/Contents/MacOS"
 	env.Append( CFLAGS=CFLAGS )
@@ -75,9 +75,9 @@ elif platform.startswith('linux'):
 	TARGET = PLUGIN_NAME + '.so'
 
 elif platform == 'win32':
-	# MAYA_BASE = "C:/aw/maya2017/"
-	MAYA_HEADERS_DIR = "C:/aw/maya2017/include"
-	MAYA_LIBRARY_DIR = "C:/Progra~1/Autodesk/Maya2017/lib/"
+	# MAYA_BASE = "C:/aw/maya2018/"
+	MAYA_HEADERS_DIR = "C:/aw/maya2018/include"
+	MAYA_LIBRARY_DIR = "C:/Progra~1/Autodesk/Maya2018/lib/"
 	env.Append( CCFLAGS=[
 		'/EHsc',	## no clue but if this isn't here, there will be tears
 		'/MT',      ## build without needing the runtime distributable
