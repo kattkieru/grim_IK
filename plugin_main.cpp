@@ -7,9 +7,8 @@
 MStatus Grim_VIK_initializePlugin( MFnPlugin *plugin );
 MStatus Grim_VIK_uninitializePlugin( MFnPlugin *plugin );
 
-
 // ----------------------------------------------------------------------
-DLL_PUBLIC MStatus initializePlugin( MObject obj )
+PLUGIN_EXPORT MStatus initializePlugin( MObject obj )
 { 
 	MStatus   status;
 	MFnPlugin plugin(obj, PLG_COMPANY, PLG_VERSION, "Any");
@@ -29,7 +28,7 @@ DLL_PUBLIC MStatus initializePlugin( MObject obj )
 }
 
 // ----------------------------------------------------------------------
-DLL_PUBLIC MStatus uninitializePlugin( MObject obj)
+PLUGIN_EXPORT MStatus uninitializePlugin( MObject obj)
 {
 	MStatus   status;
 	MFnPlugin plugin(obj);
