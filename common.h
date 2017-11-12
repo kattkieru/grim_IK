@@ -15,7 +15,6 @@
 #include <stdint.h>
 
 #include <algorithm>
-#include <cmath>
 #include <cstdarg>
 #include <iostream>
 #include <map>

@@ -301,7 +301,7 @@ MStatus Grim_VIK::compute( const MPlug& plug, MDataBlock& data )
 			float reflect_angle = acos(upper_bone_vector * goal_vector);
 
 			// bugfix: If acos fails it'll cause all kinds of silliness
-			if (!std::isnan(reflect_angle)) {
+			if (!isnan(reflect_angle)) {
 				MVector reflected = spin_vector_around_axis(upper_bone_vector, 
 						reflect_angle * 2.0,
 						side_vector);
