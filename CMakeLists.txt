@@ -7,8 +7,8 @@ set( CMAKE_CXX_STANDARD 14 )
 set( MAYA_VER "2018" CACHE STRING "Version of Maya to build against" )
 
 if(APPLE)
-	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fPIC -mavx" )
-	set( MAYA_ROOT    "/Applications/Autodesk/maya${MAYA_VER}" )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fPIC -mavx -fvisibility=hidden" )
+	set( MAYA_ROOT    "/Applications/Autodesk/maya${MAYA_VER}")
 	set( MAYA_LIBS    "${MAYA_ROOT}/Maya.app/Contents/MacOS" CACHE STRING "Location of Maya Libraries" )
 	set( MAYA_INCLUDE "${MAYA_ROOT}/include" CACHE STRING "Location of Maya Headers" )
 	add_definitions(
@@ -16,44 +16,41 @@ if(APPLE)
 		-DOSMacOSX_ -DREQUIRE_IOSTREAM -DOSMac_MachO_
 		-D_LANGUAGE_C_PLUS_PLUS
 	)
-elseif( MSVC )
-	add_definitions( -DNT_PLUGIN -D_CRT_SECURE_NO_WARNINGS )
-	set( MAYA_ROOT    0 CACHE STRING "C:/Program Files/Autodesk/maya${MAYA_VER}/")
-	set( MAYA_LIBS    0 CACHE STRING "${MAYA_ROOT}/bin/")
-	set( MAYA_INCLUDE 0 CACHE STRING "${MAYA_ROOT}/include/")
-	set( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS}
-		/EHsc
-		/MT
-		/Zi
-		/Oi
-		/fp:fast'
-		/O2'
-	)
-	target_link_libraries(
-		Image
-		kernel32
-		user32
-		gdi32
-		winspool
-		comdlg32
-		advapi32
-		shell32
-		ole32
-		oleaut32
-		uuid
-		odbc32
-		odbccp32
-		/INCREMENTAL:NO
-		/SUBSYSTEM:WINDOWS
-		/OPT:REF
-		/OPT:ICF
-		/DYNAMICBASE:NO
-		/MACHINE:X64
-		# /debug:full
+	set( PLATFORM_LINK
+		m
 	)
 
+	set( PLUGIN_SUFFIX ".bundle" )
+
+elseif( MSVC )
+	add_definitions( -DNT_PLUGIN -D_CRT_SECURE_NO_WARNINGS )
+	set( MAYA_ROOT    "C:/Program Files/Autodesk/maya${MAYA_VER}/" )
+	set( MAYA_LIBS    "${MAYA_ROOT}/lib/" CACHE STRING "Location of Maya Libraries" )
+	set( MAYA_INCLUDE "${MAYA_ROOT}/include/" CACHE STRING "Location of Maya Headers" )
+	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /MT /Zi /Oi /fp:fast /O2" )
+	set( PLATFORM_LINK
+		kernel32.lib
+		user32.lib
+		gdi32.lib
+		winspool.lib
+		comdlg32.lib
+		advapi32.lib
+		shell32.lib
+		ole32.lib
+		oleaut32.lib
+		uuid.lib
+		odbc32.lib
+		odbccp32.lib
+	)
+
+	set( LINK_FLAGS
+		"/INCREMENTAL:NO /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /DYNAMICBASE:NO /MACHINE:X64" # /debug:full
+	)
+
+	set( PLUGIN_SUFFIX ".mll" )
+
 	if( MSVC_VERSION GREATER 1800 )
-		target_link_libraries( legacy_stdio_definitions.lib )
+		set( PLATFORM_LINK ${PLATFORM_LINK} legacy_stdio_definitions.lib )
 	endif()
 else()
 	message( FATAL_ERROR "Unsupported OS -- aborting." )
@@ -66,11 +63,13 @@ set( SOURCE_FILES plugin_main.cpp grim_vik.cpp )
 
 add_library( grim_IK SHARED ${SOURCE_FILES} )
 set_target_properties( grim_IK PROPERTIES PREFIX "" )
-set_target_properties( grim_IK PROPERTIES SUFFIX ".bundle" )
+set_target_properties( grim_IK PROPERTIES SUFFIX ${PLUGIN_SUFFIX} )
 target_link_libraries( grim_IK
 	OpenMaya
 	OpenMayaAnim
 	Foundation
+	${PLATFORM_LINK}
 )
+set_property( TARGET grim_IK APPEND PROPERTY LINK_FLAGS ${LINK_FLAGS} )
 
 message( "Configured for Maya: ${MAYA_ROOT}" )
