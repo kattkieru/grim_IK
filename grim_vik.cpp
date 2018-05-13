@@ -298,7 +298,7 @@ MStatus Grim_VIK::compute( const MPlug& plug, MDataBlock& data )
 			// then negate. Distance traveled along that vector is reverseBlend.
 			// goal vector is still normalized from above, so we have to
 			// re-scale it here for the projection
-			float reflect_angle = acos(upper_bone_vector * goal_vector);
+			float reflect_angle = acos(static_cast<float>(upper_bone_vector * goal_vector));
 
 			// bugfix: If acos fails it'll cause all kinds of silliness
 			if (!isnan(reflect_angle)) {
