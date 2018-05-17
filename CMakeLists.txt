@@ -8,7 +8,7 @@ set( MAYA_VER "2018" CACHE STRING "Version of Maya to build against" )
 
 if(APPLE)
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -fPIC -mavx -fvisibility=hidden" )
-	set( MAYA_ROOT    "/Applications/Autodesk/maya${MAYA_VER}")
+	set( MAYA_ROOT    "/Applications/Autodesk/maya${MAYA_VER}" CACHE STRING "Location of Maya")
 	set( MAYA_LIBS    "${MAYA_ROOT}/Maya.app/Contents/MacOS" CACHE STRING "Location of Maya Libraries" )
 	set( MAYA_INCLUDE "${MAYA_ROOT}/include" CACHE STRING "Location of Maya Headers" )
 	add_definitions(
@@ -24,7 +24,7 @@ if(APPLE)
 
 elseif( MSVC )
 	add_definitions( -DNT_PLUGIN -D_CRT_SECURE_NO_WARNINGS )
-	set( MAYA_ROOT    "C:/Program Files/Autodesk/maya${MAYA_VER}/" )
+	set( MAYA_ROOT    "C:/aw/maya${MAYA_VER}/" CACHE STRING "Location of Maya" )
 	set( MAYA_LIBS    "${MAYA_ROOT}/lib/" CACHE STRING "Location of Maya Libraries" )
 	set( MAYA_INCLUDE "${MAYA_ROOT}/include/" CACHE STRING "Location of Maya Headers" )
 	set( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc /MT /Zi /Oi /fp:fast /O2" )
