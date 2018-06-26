@@ -21,7 +21,7 @@ public:
 
 	virtual MStatus		compute( const MPlug& plug, MDataBlock& data );
 
-	inline void         calculate_orientations( Pose &pose, const MPoint &pole_point, const bool flip );
+	inline void         calculate_orientations( Pose &pose, const MPoint &pole_point, const MVector &aimVectorDirection, const MVector &poleVectorDirection );
 
 	static  void*		creator();
 	static  MStatus		initialize();
@@ -51,6 +51,9 @@ public:
 	static MObject      iLengthBoost;
 	static MObject      iSoftness;
 	static MObject      iTwist;
+
+	static MObject      iAimDirection;
+	static MObject      iPoleVectorDirection;
 
 	// outputs
 	static MObject      oOutTranslate;

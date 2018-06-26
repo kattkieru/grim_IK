@@ -27,6 +27,9 @@ MObject Grim_VIK::iLengthBoost;
 MObject Grim_VIK::iSoftness;
 MObject Grim_VIK::iTwist;
 
+MObject Grim_VIK::iAimDirection;
+MObject Grim_VIK::iPoleVectorDirection;
+
 MObject Grim_VIK::oOutTranslate;
 MObject Grim_VIK::oOutRotateX;
 MObject Grim_VIK::oOutRotateY;
@@ -68,7 +71,8 @@ MStatus Grim_VIK::setDependentsDirty( const MPlug &plugBeingDirtied, MPlugArray 
 */
 
 // ----------------------------------------------------------------------
-inline void Grim_VIK::calculate_orientations( Pose &pose, const MPoint &pole_point, const bool flip ) {
+inline void Grim_VIK::calculate_orientations( Pose &pose, const MPoint &pole_point,
+	const MVector &aimDirection, const MVector &poleVectorDirection ) {
 	MVector upper_vector = (pose.position[1] - pose.position[0]);
 	MVector lower_vector = (pose.position[2] - pose.position[1]);
 	MVector goal_vector  = (pose.position[2] - pose.position[0]);
@@ -82,9 +86,25 @@ inline void Grim_VIK::calculate_orientations( Pose &pose, const MPoint &pole_poi
 	pole_vector.normalize();
 
 	MVector side_vector = goal_vector ^ pole_vector;
+	side_vector.normalize();
 
-	pose.orientation[0] = MTransformationMatrix(matrix_from_two_vectors(upper_vector, side_vector, flip)).rotation();
-	pose.orientation[1] = MTransformationMatrix(matrix_from_two_vectors(lower_vector, side_vector, flip)).rotation();
+	auto create_rotation_matrix = [aimDirection, poleVectorDirection]( const MVector &aim, const MVector &up )
+	{
+		// aim is down the joint.  aim^up is towards the pole vector.
+		MVector pv = up ^ aim;
+
+		// aimVectorDirection is the direction down the joint, and poleVectorDirection
+		// points towards the pole vector.  Take the cross product of these.
+		MVector upVectorDirection = aimDirection ^ poleVectorDirection;
+
+		MVector xVector = aim*aimDirection[0] + pv*poleVectorDirection[0] + up*upVectorDirection[0];
+		MVector yVector = aim*aimDirection[1] + pv*poleVectorDirection[1] + up*upVectorDirection[1];
+		MVector zVector = aim*aimDirection[2] + pv*poleVectorDirection[2] + up*upVectorDirection[2];
+		return matrix_from_three_vectors( xVector, yVector, zVector );
+	};
+
+	pose.orientation[0] = MTransformationMatrix(create_rotation_matrix(upper_vector, side_vector)).rotation();
+	pose.orientation[1] = MTransformationMatrix(create_rotation_matrix(lower_vector, side_vector)).rotation();
 }
 
 
@@ -126,6 +146,9 @@ MStatus Grim_VIK::compute( const MPlug& plug, MDataBlock& data )
 	double  lengthBoost      = data.inputValue(iLengthBoost).asDouble();
 	double  softness         = data.inputValue(iSoftness).asDouble();
 	double  twist            = data.inputValue(iTwist).asDouble();
+
+	MVector aimDirection = data.inputValue(iAimDirection).asVector();
+	MVector poleVectorDirection = data.inputValue(iPoleVectorDirection).asDouble3();
 
 	// new favorite trick of stealing scale from root matrix instead of pumping in a compensate value
 	double scale_compensate = MVector(rootMatrix[0][0], rootMatrix[0][1], rootMatrix[0][2]).length();
@@ -313,7 +336,16 @@ MStatus Grim_VIK::compute( const MPlug& plug, MDataBlock& data )
 			}
 		}
 
-		calculate_orientations( ik_pose, polePos, flipOrientation );
+		// If flipOrientation is true, flip the aim and pole vector directions the other
+		// way.  This is for compatibility and it's better to just set the attributes.
+		if( flipOrientation )
+		{
+			aimDirection *= -1;
+			poleVectorDirection *= -1;
+		}
+		aimDirection.normalize();
+		poleVectorDirection.normalize();
+		calculate_orientations( ik_pose, polePos, aimDirection, poleVectorDirection );
 
 		// tip orientation based on blend, not vectors
 		if (orientTipBlend == 0.0) {
@@ -621,6 +653,32 @@ MStatus Grim_VIK::initialize()
 		}
 	}
 
+	MObject iAimDirectionX = nAttr.create( "aimDirectionX", "aimDirectionX", MFnNumericData::kDouble, 1.0 );
+	nAttr.setCached(true);
+	MObject iAimDirectionY = nAttr.create( "aimDirectionY", "aimDirectionY", MFnNumericData::kDouble, 0.0 );
+	nAttr.setCached(true);
+	MObject iAimDirectionZ = nAttr.create( "aimDirectionZ", "aimDirectionZ", MFnNumericData::kDouble, 0.0 );
+	nAttr.setCached(true);
+	iAimDirection = nAttr.create( "aimDirection", "aimDirection", iAimDirectionX, iAimDirectionY, iAimDirectionZ );
+	nAttr.setCached(true);
+	CHECK_MSTATUS_AND_RETURN_IT( addAttribute(iAimDirection) );
+
+	MObject iPoleVectorDirectionX = nAttr.create( "poleVectorDirectionX", "poleVectorDirectionX", MFnNumericData::kDouble, 0.0 );
+	nAttr.setCached(true);
+	MObject iPoleVectorDirectionY = nAttr.create( "poleVectorDirectionY", "poleVectorDirectionY", MFnNumericData::kDouble, 1.0 );
+	nAttr.setCached(true);
+	MObject iPoleVectorDirectionZ = nAttr.create( "poleVectorDirectionZ", "poleVectorDirectionZ", MFnNumericData::kDouble, 0.0 );
+	nAttr.setCached(true);
+	iPoleVectorDirection = nAttr.create( "poleVectorDirection", "poleVectorDirection", iPoleVectorDirectionX, iPoleVectorDirectionY, iPoleVectorDirectionZ );
+	nAttr.setCached(true);
+	CHECK_MSTATUS_AND_RETURN_IT( addAttribute(iPoleVectorDirection) );
+
+	for (const auto &output_pair : all_outputs)
+	{
+		CHECK_MSTATUS_AND_RETURN_IT( attributeAffects(iAimDirection, *output_pair.second) );
+		CHECK_MSTATUS_AND_RETURN_IT( attributeAffects(iPoleVectorDirection, *output_pair.second) );
+	}
+
 	return MS::kSuccess;
 }
 
@@ -642,6 +700,8 @@ void Grim_VIK::aeTemplate() {
 				editorTemplate -addControl "lowerLengthBoost";
 				editorTemplate -addControl "lengthBoost";
 				editorTemplate -addControl "softness";
+				editorTemplate -addControl "aimDirection";
+				editorTemplate -addControl "poleVectorDirection";
 			editorTemplate -endLayout;
 
 			AEdependNodeTemplate $nodeName;
